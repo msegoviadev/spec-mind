@@ -116,23 +116,29 @@ Stripped from output:
 
 ## Output Format
 
-```yaml
+```
 # COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
 # Source: openapi.yaml | Generated: 2026-03-22T00:00:00Z | Spec version: 1.0.0
 # API: My API — https://api.example.com/v1
 # NOTATION: ? optional  [ro] readOnly  [w] writeOnly  =val default
+#           ^ header  ~cookie  *N multipleOf N  | enum or nullable
+#           OneOf<A,B> on field = discriminated union
+#           {*:T} = map/dict  {...} = open object  extends = allOf
+#           & = inline extension  ~~name~~ = deprecated  # = inline note
+#           [multipart] [form] [binary] [text] = request body encoding
 
 ## Products
 GET /products
   ?page:int=1, ?limit:int=20(<=100)
-  -> 200: Product[]
+  -> 200: {products?:Product[], pagination?:Pagination}
 
-POST /products
-  body: CreateProductRequest
-  -> 201: Product
+GET /products/{productId:uuid}
+  -> 200: Product
+  -> 404: {error?, message?, code?}
 
 ## Schemas
-Product:     {id:uuid[ro], name, price:float}
+Product:    {id:uuid[ro], name, description?, price:float, category?, inStock?:bool=true}
+Pagination: {currentPage?:int, totalPages?:int, totalItems?:int, itemsPerPage?:int}
 ```
 
 ## License
