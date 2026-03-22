@@ -20,7 +20,7 @@ function findSpecs(dir: string): string[] {
     } else if (stat.isFile()) {
       const ext = extname(entry).toLowerCase()
       if (['.yaml', '.yml', '.json'].includes(ext)) {
-        if (!entry.endsWith('.mind.yaml') && !entry.endsWith('.mind.yml') && !entry.endsWith('.mind.json')) {
+        if (!entry.endsWith('.mind')) {
           specs.push(fullPath)
         }
       }
@@ -32,7 +32,7 @@ function findSpecs(dir: string): string[] {
 
 function getOutputPath(inputPath: string): string {
   const ext = extname(inputPath)
-  return inputPath.replace(new RegExp(`${ext}$`), '.mind.yaml')
+  return inputPath.replace(new RegExp(`${ext}$`), '.mind')
 }
 
 async function processFile(
@@ -71,11 +71,11 @@ async function validateFile(input: string, noNotation: boolean): Promise<boolean
 program
   .name('spec-mind')
   .version(VERSION)
-  .description('Convert OpenAPI and AsyncAPI specs to compact .mind.yaml format')
+  .description('Convert OpenAPI and AsyncAPI specs to compact .mind format')
 
 program
   .command('convert <input>')
-  .description('Convert a single OpenAPI spec to .mind.yaml')
+  .description('Convert a single OpenAPI spec to .mind')
   .option('-o, --output <file>', 'Output file path')
   .option('--no-notation', 'Omit NOTATION legend from output')
   .action(async (input, options) => {
@@ -113,7 +113,7 @@ program
       }
     }
     
-    // Remove orphaned .mind.yaml files
+    // Remove orphaned .mind files
     const allMindFiles = findMindFiles(resolvedDir)
     for (const mindFile of allMindFiles) {
       if (!generated.has(mindFile)) {
@@ -125,7 +125,7 @@ program
 
 program
   .command('validate <input>')
-  .description('Validate .mind.yaml is in sync with source')
+  .description('Validate .mind is in sync with source')
   .option('--no-notation', 'Omit NOTATION legend from output')
   .action(async (input, options) => {
     const resolvedInput = resolve(input)
@@ -155,7 +155,7 @@ function findMindFiles(dir: string): string[] {
     
     if (stat.isDirectory()) {
       files.push(...findMindFiles(fullPath))
-    } else if (stat.isFile() && entry.endsWith('.mind.yaml')) {
+    } else if (stat.isFile() && entry.endsWith('.mind')) {
       files.push(fullPath)
     }
   }

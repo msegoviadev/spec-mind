@@ -18,7 +18,7 @@ describe('converter golden-file tests', () => {
   for (const example of examples) {
     const dir = join(EXAMPLES_DIR, example)
     const inputPath = join(dir, 'input.openapi.yaml')
-    const expectedPath = join(dir, 'output.mind.yaml')
+    const expectedPath = join(dir, 'output.mind')
 
     test(example, async () => {
       const doc = await SwaggerParser.bundle(inputPath) as OpenAPIV3.Document

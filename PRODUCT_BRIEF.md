@@ -12,7 +12,7 @@ A CLI tool that converts OpenAPI specs into a compact, token-efficient format, p
 
 ### The CLI
 
-`spec-mind` takes a directory or file and produces a `.mind.yaml` alongside each spec. It operates in **sync mode**: processes the entire directory on every run, deletes outputs for removed sources, and handles renames. The output is a compact, schema-aware specification for LLM consumption — not a contract replacement, but a faithful compressed representation that preserves type fidelity, constraints, and operation semantics.
+`spec-mind` takes a directory or file and produces a `.mind` alongside each spec. It operates in **sync mode**: processes the entire directory on every run, deletes outputs for removed sources, and handles renames. The output is a compact, schema-aware specification for LLM consumption — not a contract replacement, but a faithful compressed representation that preserves type fidelity, constraints, and operation semantics.
 
 **v1 supports:**
 - OpenAPI 3.0 / 3.1 (REST, request/response)
@@ -43,7 +43,7 @@ Under the hood: `@apidevtools/swagger-parser` for OpenAPI parsing and `$ref` res
 
 The Action wraps the CLI with two modes:
 
-**Validate mode (default):** Fails CI if the committed `.mind.yaml` does not match what the converter would produce from the current source. The converter produces canonical, deterministic output — field and enum ordering follows the source spec, and two runs on the same spec produce identical bytes. Any difference is a failure. Same pattern as `gofmt` or `prettier --check`. Works with branch-protected `main`, produces no auto-commits, keeps history clean.
+**Validate mode (default):** Fails CI if the committed `.mind` does not match what the converter would produce from the current source. The converter produces canonical, deterministic output — field and enum ordering follows the source spec, and two runs on the same spec produce identical bytes. Any difference is a failure. Same pattern as `gofmt` or `prettier --check`. Works with branch-protected `main`, produces no auto-commits, keeps history clean.
 
 **Generate mode (opt-in):** Runs the sync and commits outputs back. Suitable for feature branches or teams that explicitly accept the auto-commit tradeoffs. Guarded against CI loops via commit message sentinel.
 

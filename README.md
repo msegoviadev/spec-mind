@@ -1,6 +1,6 @@
 # spec-mind
 
-Convert OpenAPI and AsyncAPI specifications into compact, token-efficient `.mind.yaml` format designed for LLM consumption. Achieves 60-80% token reduction while preserving essential API contract information.
+Convert OpenAPI and AsyncAPI specifications into compact, token-efficient `.mind` format designed for LLM consumption. Achieves 60-80% token reduction while preserving essential API contract information.
 
 ## Installation
 
@@ -16,7 +16,7 @@ bun install -g spec-mind
 
 ```bash
 spec-mind convert openapi.yaml
-# Creates openapi.mind.yaml
+# Creates openapi.mind
 ```
 
 ### Convert with custom output
@@ -30,14 +30,14 @@ spec-mind convert openapi.yaml -o output.yaml
 ```bash
 spec-mind sync ./api-specs/
 # Processes all *.yaml/*.yml/*.json files
-# Removes orphaned .mind.yaml files
+# Removes orphaned .mind files
 ```
 
 ### Validate (for CI)
 
 ```bash
 spec-mind validate openapi.yaml
-# Exits 0 if .mind.yaml is in sync with source
+# Exits 0 if .mind is in sync with source
 # Exits 1 if drift detected
 ```
 
@@ -70,7 +70,7 @@ spec-mind validate ./api/openapi.yaml || exit 1
 
 ## Format Specification
 
-See [FORMAT_SPEC.md](./FORMAT_SPEC.md) for the complete `.mind.yaml` specification.
+See [FORMAT_SPEC.md](./FORMAT_SPEC.md) for the complete `.mind` specification.
 
 ## How It Works
 

@@ -1,6 +1,6 @@
 # spec-mind Format Specification
 
-This document defines the compact `.mind.yaml` notation produced by the spec-mind converter. It is the technical contract between the format design and the converter implementation. Any change to the format must be reflected here before the converter code changes.
+This document defines the compact `.mind` notation produced by the spec-mind converter. It is the technical contract between the format design and the converter implementation. Any change to the format must be reflected here before the converter code changes.
 
 **Scope:** OpenAPI 3.0 and 3.1 (REST/HTTP). AsyncAPI is out of scope for this version.
 
@@ -10,7 +10,7 @@ See **Section 16** for a complete list of known limitations and intentionally de
 
 ## 1. File Header
 
-Every `.mind.yaml` file begins with a required header block:
+Every `.mind` file begins with a required header block:
 
 ```
 # COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
@@ -62,10 +62,10 @@ The converter must produce deterministic output that satisfies a byte-for-byte c
 - **Indentation:** 2 spaces. No tabs.
 - **Trailing whitespace:** none on any line.
 - **End of file:** exactly one trailing newline (`\n`).
-- **Quoting:** values are unquoted unless they contain characters that require quoting in the `.mind.yaml` format. Only enum constants (`type:"credit_card"`) and string literal defaults with special characters use quotes. Plain identifiers, type names, and constraint expressions are never quoted.
+- **Quoting:** values are unquoted unless they contain characters that require quoting in the `.mind` format. Only enum constants (`type:"credit_card"`) and string literal defaults with special characters use quotes. Plain identifiers, type names, and constraint expressions are never quoted.
 - **Comments:** all comment lines begin with `# ` (hash followed by a single space). The header block comments are the only comment lines in the file, except for inline notes appended to `->` lines (`# application/pdf`).
 - **Blank lines:** one blank line between the header block and the first content section; one blank line between tag sections; no blank lines within a schema line.
-- **Notation-stripped mode:** When invoked with `--no-notation`, the converter omits the six `NOTATION` legend lines from the header. Only the three metadata comment lines (`COMPACT INDEX`, `Source/Generated`, `API`) are emitted. Use this flag when injecting multiple specs into the same LLM context to avoid repeating the legend on every file. Both modes produce valid `.mind.yaml` output.
+- **Notation-stripped mode:** When invoked with `--no-notation`, the converter omits the six `NOTATION` legend lines from the header. Only the three metadata comment lines (`COMPACT INDEX`, `Source/Generated`, `API`) are emitted. Use this flag when injecting multiple specs into the same LLM context to avoid repeating the legend on every file. Both modes produce valid `.mind` output.
 
 ---
 
