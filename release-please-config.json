@@ -3,7 +3,8 @@
   "packages": {
     ".": {
       "release-type": "node",
-      "package-name": "spec-mind"
+      "package-name": "spec-mind",
+      "include-component-in-tag": false
     }
   }
 }
