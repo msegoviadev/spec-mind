@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from '@apidevtools/swagger-parser'
+import type { OpenAPIV3 } from 'openapi-types'
 import { renderField, renderNamedSchema, renderSchemaType, refName } from './emitter'
 import { compactType } from './typeMap'
 import type { ConvertOptions, RefCounts } from './types'

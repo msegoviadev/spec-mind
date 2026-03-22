@@ -1,4 +1,4 @@
-# Product Brief: specmind
+# Product Brief: spec-mind
 
 ## Problem
 
@@ -12,7 +12,7 @@ A CLI tool that converts OpenAPI specs into a compact, token-efficient format, p
 
 ### The CLI
 
-`specmind` takes a directory or file and produces a `.mind.yaml` alongside each spec. It operates in **sync mode**: processes the entire directory on every run, deletes outputs for removed sources, and handles renames. The output is a compact, schema-aware specification for LLM consumption — not a contract replacement, but a faithful compressed representation that preserves type fidelity, constraints, and operation semantics.
+`spec-mind` takes a directory or file and produces a `.mind.yaml` alongside each spec. It operates in **sync mode**: processes the entire directory on every run, deletes outputs for removed sources, and handles renames. The output is a compact, schema-aware specification for LLM consumption — not a contract replacement, but a faithful compressed representation that preserves type fidelity, constraints, and operation semantics.
 
 **v1 supports:**
 - OpenAPI 3.0 / 3.1 (REST, request/response)

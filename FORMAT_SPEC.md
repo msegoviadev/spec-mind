@@ -1,6 +1,6 @@
-# specmind Format Specification
+# spec-mind Format Specification
 
-This document defines the compact `.mind.yaml` notation produced by the specmind converter. It is the technical contract between the format design and the converter implementation. Any change to the format must be reflected here before the converter code changes.
+This document defines the compact `.mind.yaml` notation produced by the spec-mind converter. It is the technical contract between the format design and the converter implementation. Any change to the format must be reflected here before the converter code changes.
 
 **Scope:** OpenAPI 3.0 and 3.1 (REST/HTTP). AsyncAPI is out of scope for this version.
 
@@ -620,4 +620,4 @@ The following OpenAPI features are intentionally not represented in this version
 
 **Other:**
 - XML serialization (`xml` object)
-- External `$ref` files: only intra-spec `$ref` is resolved. When the converter encounters an unresolvable external `$ref`, it must **fail with a clear error message** identifying the unresolved reference path. To use specmind with a modular spec, pre-process it into a single bundled file first (e.g. `swagger-parser bundle openapi.yaml -o bundled.yaml` or `redocly bundle openapi.yaml -o bundled.yaml`).
+- External `$ref` files: only intra-spec `$ref` is resolved. When the converter encounters an unresolvable external `$ref`, it must **fail with a clear error message** identifying the unresolved reference path. To use spec-mind with a modular spec, pre-process it into a single bundled file first (e.g. `swagger-parser bundle openapi.yaml -o bundled.yaml` or `redocly bundle openapi.yaml -o bundled.yaml`).

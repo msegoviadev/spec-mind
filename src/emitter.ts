@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from '@apidevtools/swagger-parser'
+import type { OpenAPIV3 } from 'openapi-types'
 import { compactType, isEmptySchema } from './typeMap'
 import type { RefCounts } from './types'
 

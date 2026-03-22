@@ -3,7 +3,7 @@ import SwaggerParser from '@apidevtools/swagger-parser'
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { convert } from '../src/converter'
-import type { OpenAPIV3 } from '@apidevtools/swagger-parser'
+import type { OpenAPIV3 } from 'openapi-types'
 
 const EXAMPLES_DIR = join(import.meta.dir, '../examples')
 
