@@ -4,10 +4,37 @@ Convert OpenAPI and AsyncAPI specifications into compact, token-efficient `.mind
 
 ## Installation
 
+### Download Binary (Recommended)
+
+Download from [GitHub Releases](https://github.com/msegoviadev/spec-mind/releases):
+
 ```bash
-npm install -g spec-mind
-# or
-bun install -g spec-mind
+# macOS (Apple Silicon)
+curl -LO https://github.com/msegoviadev/spec-mind/releases/latest/download/spec-mind-darwin-arm64
+chmod +x spec-mind-darwin-arm64
+sudo mv spec-mind-darwin-arm64 /usr/local/bin/spec-mind
+
+# macOS (Intel)
+curl -LO https://github.com/msegoviadev/spec-mind/releases/latest/download/spec-mind-darwin-x64
+chmod +x spec-mind-darwin-x64
+sudo mv spec-mind-darwin-x64 /usr/local/bin/spec-mind
+
+# Linux (x64)
+curl -LO https://github.com/msegoviadev/spec-mind/releases/latest/download/spec-mind-linux-x64
+chmod +x spec-mind-linux-x64
+sudo mv spec-mind-linux-x64 /usr/local/bin/spec-mind
+
+# Windows (PowerShell)
+Invoke-WebRequest -Uri https://github.com/msegoviadev/spec-mind/releases/latest/download/spec-mind-windows-x64.exe -OutFile spec-mind.exe
+```
+
+### Build from Source
+
+```bash
+git clone https://github.com/msegoviadev/spec-mind.git
+cd spec-mind
+bun install
+bun run build
 ```
 
 ## Usage
