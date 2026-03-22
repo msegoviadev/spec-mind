@@ -1,6 +1,6 @@
 {
   "name": "spec-mind",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Convert OpenAPI and AsyncAPI specs to compact, LLM-friendly format",
   "author": "Marcos Segovia",
   "license": "MIT",
