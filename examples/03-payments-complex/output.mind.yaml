@@ -1,0 +1,59 @@
+# COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
+# Source: examples/03-payments-complex/input.openapi.yaml | Generated: 2026-03-22T00:00:00Z | Spec version: 3.0.0
+# API: Catalog & Pricing API — https://api.catalog.example.com/v3
+# NOTATION: ? optional  [ro] readOnly  [w] writeOnly  =val default
+#           ^ header  ~cookie  *N multipleOf N  | enum or nullable
+#           OneOf<A,B> on field = discriminated union
+#           {*:T} = map/dict  {...} = open object  extends = allOf
+#           & = inline extension  ~~name~~ = deprecated  # = inline note
+#           [multipart] [form] [binary] [text] = request body encoding
+
+[auth: bearer]
+
+## Categories
+GET /categories
+  ?depth:int=0(0..5), ^?X-Request-Id:uuid
+  -> 200: Category[]
+
+POST /categories
+  body: {name(1..100), parentId?:uuid|null, metadata?:{*:string}(max:20)}
+  -> 201: Category
+  -> 400: ErrorResponse
+
+GET /categories/{categoryId:uuid}
+  ?depth:int=1(0..5)
+  -> 200: Category
+  -> 404: ErrorResponse
+
+## Pricing
+GET /pricing/rules
+  ?categoryId:uuid, ?active:bool
+  -> 200: PricingRule[]
+
+POST /pricing/rules
+  body: CreatePricingRuleRequest
+  -> 201: PricingRule
+  -> 400: ErrorResponse
+
+POST /pricing/calculate
+  body: {productId:uuid, quantity:int(>=1), currency:USD|EUR|GBP}
+  -> 200: PriceBreakdown
+
+## Audit
+~~GET~~ /audit/events
+  ?from:datetime, ?to:datetime, ?entityType, ?page:int=1, ?limit:int=50(<=200)
+  -> 200: {events:AuditEvent[], pagination:Pagination}
+
+GET /audit/v2/events
+  ?from:datetime, ?to:datetime, ?entityType, ?cursor, ?limit:int=50(<=200)
+  -> 200: {events:AuditEvent[], nextCursor:string|null}
+
+## Schemas
+Category:                {id:uuid[ro], name, parentId?:uuid|null, children?:Category[], metadata?:{*:string}, createdAt:datetime[ro], ~~legacyCode~~?}
+PricingRule:             {id:uuid[ro], name, categoryId?:uuid|null, type:percentage_discount|fixed_discount|markup, value:double(>=0,*0.01), maxDiscount?:double|null, active:bool=true, conditions?:Conditions, createdAt:datetime[ro]}
+CreatePricingRuleRequest:{name(1..100), categoryId?:uuid|null, type:percentage_discount|fixed_discount|markup, value:double(>=0,*0.01), maxDiscount?:double|null, active?:bool=true, conditions?:Conditions}
+PriceBreakdown:          {basePrice:double(*0.01), finalPrice:double(*0.01), currency:USD|EUR|GBP, discountAmount?:double(*0.01), appliedRules:{ruleId:uuid, ruleName, impact:double(*0.01)}[]}
+AuditEvent:              {id:uuid[ro], entityType, entityId:uuid, action:created|updated|deleted|viewed, actorId:uuid, changes?:Conditions, httpStatusCode?:int:200|201|204|400|401|403|404|409|422|500, timestamp:datetime[ro]}
+Conditions:              {...}
+ErrorResponse:           {error, message, code?}
+Pagination:              {page?:int, totalPages?:int, totalItems?:int, itemsPerPage?:int}

@@ -1,0 +1,311 @@
+openapi: 3.0.0
+info:
+  title: E-commerce API
+  version: 1.0.0
+  description: REST API for managing products, orders, and users
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+
+tags:
+  - name: Products
+    description: Product catalog operations
+  - name: Orders
+    description: Order management
+
+paths:
+  /products:
+    get:
+      summary: List all products
+      description: Retrieve a paginated list of all products in the catalog
+      operationId: listProducts
+      tags:
+        - Products
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+              example:
+                products:
+                  - id: "prod-123"
+                    name: "Wireless Headphones"
+                    price: 79.99
+                pagination:
+                  currentPage: 1
+                  totalPages: 5
+                  totalItems: 87
+                  itemsPerPage: 20
+
+  /products/{productId}:
+    get:
+      summary: Get product details
+      description: Retrieve detailed information about a specific product
+      operationId: getProduct
+      tags:
+        - Products
+      parameters:
+        - name: productId
+          in: path
+          description: Unique product identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+              example:
+                id: "prod-123"
+                name: "Wireless Headphones"
+                price: 79.99
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  code:
+                    type: string
+              example:
+                error: "Not Found"
+                message: "The product with ID 'prod-999' does not exist"
+                code: "PRODUCT_NOT_FOUND"
+
+  /orders:
+    post:
+      summary: Create new order
+      description: Place a new order for products
+      operationId: createOrder
+      tags:
+        - Orders
+      requestBody:
+        description: Order details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+            example:
+              userId: "user-123"
+              items:
+                - productId: "prod-456"
+                  quantity: 2
+              shippingAddress:
+                street: "123 Main St"
+                city: "San Francisco"
+                state: "CA"
+                zipCode: "94102"
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Invalid order data
+
+  /users/{userId}/orders:
+    get:
+      summary: Get user's orders
+      description: Retrieve all orders for a specific user
+      operationId: getUserOrders
+      tags:
+        - Orders
+      parameters:
+        - name: userId
+          in: path
+          description: User identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of user orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+
+components:
+  schemas:
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - price
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        category:
+          type: string
+        inStock:
+          type: boolean
+          default: true
+        imageUrl:
+          type: string
+          format: uri
+
+    Order:
+      type: object
+      required:
+        - id
+        - userId
+        - items
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        userId:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        totalAmount:
+          type: number
+          format: float
+        status:
+          type: string
+          enum:
+            - pending
+            - confirmed
+            - shipped
+            - delivered
+            - cancelled
+        shippingAddress:
+          $ref: '#/components/schemas/Address'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+
+    OrderItem:
+      type: object
+      required:
+        - productId
+        - quantity
+        - price
+      properties:
+        productId:
+          type: string
+        productName:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        price:
+          type: number
+          format: float
+
+    CreateOrderRequest:
+      type: object
+      required:
+        - userId
+        - items
+        - shippingAddress
+      properties:
+        userId:
+          type: string
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - productId
+              - quantity
+            properties:
+              productId:
+                type: string
+              quantity:
+                type: integer
+                minimum: 1
+        shippingAddress:
+          $ref: '#/components/schemas/Address'
+
+    Address:
+      type: object
+      required:
+        - street
+        - city
+        - state
+        - zipCode
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        country:
+          type: string
+          default: "USA"
+
+    Pagination:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+        totalPages:
+          type: integer
+        totalItems:
+          type: integer
+        itemsPerPage:
+          type: integer

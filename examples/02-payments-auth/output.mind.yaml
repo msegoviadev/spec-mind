@@ -1,0 +1,69 @@
+# COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
+# Source: examples/02-payments-auth/input.openapi.yaml | Generated: 2026-03-22T00:00:00Z | Spec version: 2.1.0
+# API: Payments API — https://api.payments.example.com/v2
+# NOTATION: ? optional  [ro] readOnly  [w] writeOnly  =val default
+#           ^ header  ~cookie  *N multipleOf N  | enum or nullable
+#           OneOf<A,B> on field = discriminated union
+#           {*:T} = map/dict  {...} = open object  extends = allOf
+#           & = inline extension  ~~name~~ = deprecated  # = inline note
+#           [multipart] [form] [binary] [text] = request body encoding
+
+[auth: oauth2 payments:read,payments:write]
+
+## Health
+GET /health  [auth: none]
+  -> 200: {status:healthy|degraded|unhealthy, version?}
+
+## Payments
+GET /payments  [auth: oauth2 payments:read]
+  ?status:pending|processing|completed|failed|refunded, ?from:date, ?to:date, ?page:int=1, ?limit:int=25(<=100), ^?X-Request-Id:uuid
+  -> 200: {data:Payment[], pagination:Pagination}
+     headers: X-RateLimit-Limit:int[ro], X-RateLimit-Remaining:int[ro], X-RateLimit-Reset:datetime[ro]
+  -> 401: ErrorResponse
+
+POST /payments  [auth: oauth2 payments:write]
+  ^X-Idempotency-Key:uuid, ^?X-Request-Id:uuid
+  body: CreatePaymentRequest
+  -> 201: Payment
+     headers: Location:uri[ro]
+  -> 400: ValidationErrorResponse
+  -> 422: ErrorResponse
+  -> 429: ErrorResponse
+     headers: Retry-After:int[ro]
+
+GET /payments/{paymentId:uuid}  [auth: oauth2 payments:read]
+  -> 200: Payment
+  -> 404: ErrorResponse
+
+GET /payments/{paymentId:uuid}/receipt  [auth: oauth2 payments:read]
+  -> 200: binary  # application/pdf
+  -> 404: ErrorResponse
+
+## Refunds
+POST /payments/{paymentId:uuid}/refunds  [auth: oauth2 payments:write]
+  ^X-Idempotency-Key:uuid
+  body: CreateRefundRequest
+  -> 201: Refund
+  -> 400: ValidationErrorResponse
+  -> 409: ErrorResponse
+
+## Documents
+POST /documents  [multipart]
+  ^?X-Request-Id:uuid
+  body: {file:binary, type:invoice|identity|contract|other, description?(max:500)}
+  -> 201: {id:uuid[ro], url:uri[ro], type:invoice|identity|contract|other}
+  -> 413
+
+## Schemas
+Payment:              {id:uuid[ro], amount:float, currency:USD|EUR|GBP|JPY, status:pending|processing|completed|failed|refunded[ro], method:PaymentMethod[ro], failureReason:string|null, createdAt:datetime[ro], updatedAt:datetime[ro]}
+PaymentMethod:        OneOf<CreditCardPayment, BankTransferPayment, CryptoPayment> on type
+CreditCardPayment:    {type:"credit_card"[ro], cardNumber[w](16..16), cardCvv[w](3..4), expiryDate:date, cardholderName}
+BankTransferPayment:  {type:"bank_transfer"[ro], accountNumber[w], routingNumber[w], accountType:checking|savings}
+CryptoPayment:        {type:"crypto"[ro], walletAddress, currency:BTC|ETH|USDC|SOL}
+CreatePaymentRequest: {amount:float(>=0.01), currency:USD|EUR|GBP|JPY, method:PaymentMethod, metadata?:{*:string}}
+BaseRequest:          {requestId:uuid, note?(max:500)}
+CreateRefundRequest:  extends BaseRequest & {amount:float(>=0.01), reason?:duplicate|fraudulent|customer_request|other}
+Refund:               {id:uuid[ro], paymentId:uuid[ro], amount:float, status:pending|completed|failed[ro], reason?:duplicate|fraudulent|customer_request|other, createdAt:datetime[ro]}
+ErrorResponse:        {error, message, code?}
+ValidationErrorResponse: {error, message, fields:{*:string[]}}
+Pagination:           {page?:int, totalPages?:int, totalItems?:int, itemsPerPage?:int}

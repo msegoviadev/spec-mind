@@ -1,0 +1,35 @@
+# COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
+# Source: examples/01-ecommerce-rest/input.openapi.yaml | Generated: 2026-03-22T00:00:00Z | Spec version: 1.0.0
+# API: E-commerce API — https://api.example.com/v1
+# NOTATION: ? optional  [ro] readOnly  [w] writeOnly  =val default
+#           ^ header  ~cookie  *N multipleOf N  | enum or nullable
+#           OneOf<A,B> on field = discriminated union
+#           {*:T} = map/dict  {...} = open object  extends = allOf
+#           & = inline extension  ~~name~~ = deprecated  # = inline note
+#           [multipart] [form] [binary] [text] = request body encoding
+
+## Products
+GET /products
+  ?page:int=1, ?limit:int=20(<=100)
+  -> 200: {products:Product[], pagination:Pagination}
+
+GET /products/{productId:uuid}
+  -> 200: Product
+  -> 404: {error, message, code}
+
+## Orders
+POST /orders
+  body: CreateOrderRequest
+  -> 201: Order
+  -> 400
+
+GET /users/{userId}/orders
+  -> 200: Order[]
+
+## Schemas
+Product:            {id:uuid[ro], name, description?, price:float, category?, inStock?:bool=true, imageUrl?:uri}
+Order:              {id:uuid[ro], userId, items:OrderItem[], totalAmount?:float, status:pending|confirmed|shipped|delivered|cancelled, shippingAddress?:Address, createdAt:datetime[ro], updatedAt?:datetime}
+OrderItem:          {productId, productName?, quantity:int(>=1), price:float}
+CreateOrderRequest: {userId, items:{productId, quantity:int(>=1)}[](min:1), shippingAddress:Address}
+Address:            {street, city, state, zipCode, country?="USA"}
+Pagination:         {currentPage:int, totalPages:int, totalItems:int, itemsPerPage:int}

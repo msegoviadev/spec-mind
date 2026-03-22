@@ -1,0 +1,618 @@
+openapi: 3.0.0
+info:
+  title: Payments API
+  version: 2.1.0
+  description: API for processing payments, refunds, and document uploads
+
+servers:
+  - url: https://api.payments.example.com/v2
+    description: Production
+
+security:
+  - oauth2: [payments:read, payments:write]
+
+tags:
+  - name: Payments
+    description: Payment processing operations
+  - name: Refunds
+    description: Refund operations
+  - name: Documents
+    description: Document upload and management
+  - name: Health
+    description: Service health
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns service health status. No authentication required.
+      operationId: healthCheck
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, unhealthy]
+                  version:
+                    type: string
+
+  /payments:
+    get:
+      summary: List payments
+      description: Retrieve a paginated list of payments for the authenticated user
+      operationId: listPayments
+      tags:
+        - Payments
+      security:
+        - oauth2: [payments:read]
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [pending, processing, completed, failed, refunded]
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 25
+            maximum: 100
+        - name: X-Request-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Paginated list of payments
+          headers:
+            X-RateLimit-Limit:
+              description: Request limit per hour
+              schema:
+                type: integer
+              required: true
+            X-RateLimit-Remaining:
+              description: Remaining requests in current window
+              schema:
+                type: integer
+              required: true
+            X-RateLimit-Reset:
+              description: UTC timestamp when the rate limit window resets
+              schema:
+                type: string
+                format: date-time
+              required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Payment'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create payment
+      description: Initiate a new payment. Idempotent — supply X-Idempotency-Key to safely retry.
+      operationId: createPayment
+      tags:
+        - Payments
+      security:
+        - oauth2: [payments:write]
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Request-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRequest'
+      responses:
+        '201':
+          description: Payment initiated
+          headers:
+            Location:
+              description: URL of the created payment resource
+              schema:
+                type: string
+                format: uri
+              required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '422':
+          description: Payment could not be processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying
+              schema:
+                type: integer
+              required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/{paymentId}:
+    get:
+      summary: Get payment
+      description: Retrieve a single payment by ID
+      operationId: getPayment
+      tags:
+        - Payments
+      security:
+        - oauth2: [payments:read]
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Payment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '404':
+          description: Payment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/{paymentId}/receipt:
+    get:
+      summary: Download receipt
+      description: Download the PDF receipt for a completed payment
+      operationId: downloadReceipt
+      tags:
+        - Payments
+      security:
+        - oauth2: [payments:read]
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: PDF receipt file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Payment not found or receipt not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/{paymentId}/refunds:
+    post:
+      summary: Create refund
+      description: Issue a full or partial refund for a completed payment
+      operationId: createRefund
+      tags:
+        - Refunds
+      security:
+        - oauth2: [payments:write]
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRefundRequest'
+      responses:
+        '201':
+          description: Refund initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refund'
+        '400':
+          description: Invalid refund request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '409':
+          description: Conflict — payment already fully refunded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /documents:
+    post:
+      summary: Upload document
+      description: Upload a supporting document (e.g. invoice, ID scan). Max 10 MB.
+      operationId: uploadDocument
+      tags:
+        - Documents
+      parameters:
+        - name: X-Request-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - type
+              properties:
+                file:
+                  type: string
+                  format: binary
+                type:
+                  type: string
+                  enum: [invoice, identity, contract, other]
+                description:
+                  type: string
+                  maxLength: 500
+      responses:
+        '201':
+          description: Document uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, url, type]
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                  url:
+                    type: string
+                    format: uri
+                    readOnly: true
+                  type:
+                    type: string
+                    enum: [invoice, identity, contract, other]
+        '413':
+          description: File too large
+
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.example.com/oauth/token
+          scopes:
+            payments:read: Read payment data
+            payments:write: Create and modify payments
+
+  schemas:
+    Payment:
+      type: object
+      required:
+        - id
+        - amount
+        - currency
+        - status
+        - method
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+          enum: [USD, EUR, GBP, JPY]
+        status:
+          type: string
+          enum: [pending, processing, completed, failed, refunded]
+          readOnly: true
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        failureReason:
+          type: string
+          nullable: true
+          description: Present when status is failed. Null otherwise.
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    PaymentMethod:
+      oneOf:
+        - $ref: '#/components/schemas/CreditCardPayment'
+        - $ref: '#/components/schemas/BankTransferPayment'
+        - $ref: '#/components/schemas/CryptoPayment'
+      discriminator:
+        propertyName: type
+        mapping:
+          credit_card: '#/components/schemas/CreditCardPayment'
+          bank_transfer: '#/components/schemas/BankTransferPayment'
+          crypto: '#/components/schemas/CryptoPayment'
+
+    CreditCardPayment:
+      type: object
+      required:
+        - type
+        - cardNumber
+        - cardCvv
+        - expiryDate
+        - cardholderName
+      properties:
+        type:
+          type: string
+          enum: [credit_card]
+          readOnly: true
+        cardNumber:
+          type: string
+          minLength: 16
+          maxLength: 16
+          writeOnly: true
+        cardCvv:
+          type: string
+          minLength: 3
+          maxLength: 4
+          writeOnly: true
+        expiryDate:
+          type: string
+          format: date
+        cardholderName:
+          type: string
+
+    BankTransferPayment:
+      type: object
+      required:
+        - type
+        - accountNumber
+        - routingNumber
+        - accountType
+      properties:
+        type:
+          type: string
+          enum: [bank_transfer]
+          readOnly: true
+        accountNumber:
+          type: string
+          writeOnly: true
+        routingNumber:
+          type: string
+          writeOnly: true
+        accountType:
+          type: string
+          enum: [checking, savings]
+
+    CryptoPayment:
+      type: object
+      required:
+        - type
+        - walletAddress
+        - currency
+      properties:
+        type:
+          type: string
+          enum: [crypto]
+          readOnly: true
+        walletAddress:
+          type: string
+        currency:
+          type: string
+          enum: [BTC, ETH, USDC, SOL]
+
+    CreatePaymentRequest:
+      type: object
+      required:
+        - amount
+        - currency
+        - method
+      properties:
+        amount:
+          type: number
+          format: float
+          minimum: 0.01
+        currency:
+          type: string
+          enum: [USD, EUR, GBP, JPY]
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Arbitrary key-value metadata, e.g. order IDs, customer references
+
+    BaseRequest:
+      type: object
+      required:
+        - requestId
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        note:
+          type: string
+          maxLength: 500
+
+    CreateRefundRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          required:
+            - amount
+          properties:
+            amount:
+              type: number
+              format: float
+              minimum: 0.01
+              description: Amount to refund. Must not exceed the original payment amount.
+            reason:
+              type: string
+              enum: [duplicate, fraudulent, customer_request, other]
+
+    Refund:
+      type: object
+      required:
+        - id
+        - paymentId
+        - amount
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        paymentId:
+          type: string
+          format: uuid
+          readOnly: true
+        amount:
+          type: number
+          format: float
+        status:
+          type: string
+          enum: [pending, completed, failed]
+          readOnly: true
+        reason:
+          type: string
+          enum: [duplicate, fraudulent, customer_request, other]
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+
+    ValidationErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - fields
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        totalItems:
+          type: integer
+        itemsPerPage:
+          type: integer
