@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/msegoviadev/spec-mind/compare/v0.3.0...v0.3.1) (2026-03-22)
+
+
+### Bug Fixes
+
+* update README output format example ([a6cbb2d](https://github.com/msegoviadev/spec-mind/commit/a6cbb2d65a4dfc0db0ab7a37086bbfccddafc0f4))
+* update README output format example to match actual CLI output ([096feff](https://github.com/msegoviadev/spec-mind/commit/096feff515d7ae6a0623d0e09513ae0bfdff5cbd))
+
 ## [0.3.0](https://github.com/msegoviadev/spec-mind/compare/v0.2.0...v0.3.0) (2026-03-22)
 
 
