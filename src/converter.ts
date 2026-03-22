@@ -88,8 +88,9 @@ function resolveServerUrl(doc: Document): string {
   const servers = doc.servers
   if (!servers || servers.length === 0) return ''
 
-  let url = servers[0].url
-  const vars = servers[0].variables || {}
+  const firstServer = servers[0]!
+  let url = firstServer.url
+  const vars = firstServer.variables || {}
 
   for (const [key, varDef] of Object.entries(vars)) {
     const replacement = varDef.default ?? `{${key}}`
@@ -142,10 +143,10 @@ function renderGlobalAuth(doc: Document): string {
   if (!security || security.length === 0) return ''
 
   const schemes = (doc.components?.securitySchemes || {}) as Record<string, SecuritySchemeObject>
-  const first = security[0]
+  const first = security[0]!
   const entries = Object.entries(first)
   if (entries.length === 0) return ''
-  const [schemeName, scopes] = entries[0]
+  const [schemeName, scopes] = entries[0]!
   const scheme = schemes[schemeName]
   if (!scheme) return ''
 
@@ -178,10 +179,10 @@ function renderOperationAuth(
   if (opSecurity.length === 0) return '  [auth: none]'
 
   const schemes = (doc.components?.securitySchemes || {}) as Record<string, SecuritySchemeObject>
-  const first = opSecurity[0]
+  const first = opSecurity[0]!
   const entries = Object.entries(first)
   if (entries.length === 0) return ''
-  const [schemeName, scopes] = entries[0]
+  const [schemeName, scopes] = entries[0]!
   const scheme = schemes[schemeName]
   if (!scheme) return ''
 
@@ -430,13 +431,15 @@ function groupResponseCodes(
   const groups: ResponseGroup[] = []
   let i = 0
   while (i < rendered.length) {
-    const cur = rendered[i]
+    const cur = rendered[i]!
     // only group if no headers
     if (!cur.headers) {
       const sameBody = [cur]
       let j = i + 1
-      while (j < rendered.length && rendered[j].body === cur.body && !rendered[j].headers) {
-        sameBody.push(rendered[j])
+      while (j < rendered.length) {
+        const r = rendered[j]!
+        if (r.body !== cur.body || r.headers) break
+        sameBody.push(r)
         j++
       }
       if (sameBody.length > 1) {
@@ -466,6 +469,7 @@ function renderResponseBody(
   // prefer JSON
   const jsonKey = mediaTypes.find(m => m === 'application/json' || m.endsWith('+json'))
   const chosenKey = jsonKey || mediaTypes[0]
+  if (!chosenKey) return ''
   const chosenContent = content[chosenKey]
 
   // non-JSON responses

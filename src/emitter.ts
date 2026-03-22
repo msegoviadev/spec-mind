@@ -77,7 +77,7 @@ function explicitTypeName(
 ): string {
   if ('$ref' in schema) return refName(schema.$ref)
   const s = schema as SchemaObject
-  if (s.type === 'array' || (s as any).items) {
+  if (s.type === 'array') {
     const items = s.items
     if (!items) return 'any[]'
     const inner = explicitTypeName(items as SchemaObject | ReferenceObject, refCounts, schemas)
