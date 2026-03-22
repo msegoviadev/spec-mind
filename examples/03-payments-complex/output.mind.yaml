@@ -42,18 +42,17 @@ POST /pricing/calculate
 ## Audit
 ~~GET~~ /audit/events
   ?from:datetime, ?to:datetime, ?entityType, ?page:int=1, ?limit:int=50(<=200)
-  -> 200: {events:AuditEvent[], pagination:Pagination}
+  -> 200: {events?:AuditEvent[], pagination?:Pagination}
 
 GET /audit/v2/events
   ?from:datetime, ?to:datetime, ?entityType, ?cursor, ?limit:int=50(<=200)
-  -> 200: {events:AuditEvent[], nextCursor:string|null}
+  -> 200: {events:AuditEvent[], nextCursor?:string|null}
 
 ## Schemas
-Category:                {id:uuid[ro], name, parentId?:uuid|null, children?:Category[], metadata?:{*:string}, createdAt:datetime[ro], ~~legacyCode~~?}
-PricingRule:             {id:uuid[ro], name, categoryId?:uuid|null, type:percentage_discount|fixed_discount|markup, value:double(>=0,*0.01), maxDiscount?:double|null, active:bool=true, conditions?:Conditions, createdAt:datetime[ro]}
-CreatePricingRuleRequest:{name(1..100), categoryId?:uuid|null, type:percentage_discount|fixed_discount|markup, value:double(>=0,*0.01), maxDiscount?:double|null, active?:bool=true, conditions?:Conditions}
-PriceBreakdown:          {basePrice:double(*0.01), finalPrice:double(*0.01), currency:USD|EUR|GBP, discountAmount?:double(*0.01), appliedRules:{ruleId:uuid, ruleName, impact:double(*0.01)}[]}
-AuditEvent:              {id:uuid[ro], entityType, entityId:uuid, action:created|updated|deleted|viewed, actorId:uuid, changes?:Conditions, httpStatusCode?:int:200|201|204|400|401|403|404|409|422|500, timestamp:datetime[ro]}
-Conditions:              {...}
-ErrorResponse:           {error, message, code?}
-Pagination:              {page?:int, totalPages?:int, totalItems?:int, itemsPerPage?:int}
+Category:                 {id:uuid[ro], name, parentId?:uuid|null, children?:Category[], metadata?:{*:string}, createdAt:datetime[ro], ~~legacyCode~~?}
+PricingRule:              {id:uuid[ro], name, categoryId?:uuid|null, type:percentage_discount|fixed_discount|markup, value:double(>=0,*0.01), maxDiscount?:double|null, active:bool=true, conditions?:{...}, createdAt:datetime[ro]}
+CreatePricingRuleRequest: {name(1..100), categoryId?:uuid|null, type:percentage_discount|fixed_discount|markup, value:double(>=0,*0.01), maxDiscount?:double|null, active?:bool=true, conditions?:{...}}
+PriceBreakdown:           {basePrice:double(*0.01), finalPrice:double(*0.01), currency:USD|EUR|GBP, discountAmount?:double(*0.01), appliedRules:{ruleId:uuid, ruleName, impact:double(*0.01)}[]}
+AuditEvent:               {id:uuid[ro], entityType, entityId:uuid, action:created|updated|deleted|viewed, actorId:uuid, changes?:{...}, httpStatusCode?:int:200|201|204|400|401|403|404|409|422|500, timestamp:datetime[ro]}
+ErrorResponse:            {error, message, code?}
+Pagination:               {page?:int, totalPages?:int, totalItems?:int, itemsPerPage?:int}

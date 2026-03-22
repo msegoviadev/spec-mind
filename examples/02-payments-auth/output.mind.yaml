@@ -12,12 +12,12 @@
 
 ## Health
 GET /health  [auth: none]
-  -> 200: {status:healthy|degraded|unhealthy, version?}
+  -> 200: {status?:healthy|degraded|unhealthy, version?}
 
 ## Payments
 GET /payments  [auth: oauth2 payments:read]
   ?status:pending|processing|completed|failed|refunded, ?from:date, ?to:date, ?page:int=1, ?limit:int=25(<=100), ^?X-Request-Id:uuid
-  -> 200: {data:Payment[], pagination:Pagination}
+  -> 200: {data?:Payment[], pagination?:Pagination}
      headers: X-RateLimit-Limit:int[ro], X-RateLimit-Remaining:int[ro], X-RateLimit-Reset:datetime[ro]
   -> 401: ErrorResponse
 
@@ -55,15 +55,15 @@ POST /documents  [multipart]
   -> 413
 
 ## Schemas
-Payment:              {id:uuid[ro], amount:float, currency:USD|EUR|GBP|JPY, status:pending|processing|completed|failed|refunded[ro], method:PaymentMethod[ro], failureReason:string|null, createdAt:datetime[ro], updatedAt:datetime[ro]}
-PaymentMethod:        OneOf<CreditCardPayment, BankTransferPayment, CryptoPayment> on type
-CreditCardPayment:    {type:"credit_card"[ro], cardNumber[w](16..16), cardCvv[w](3..4), expiryDate:date, cardholderName}
-BankTransferPayment:  {type:"bank_transfer"[ro], accountNumber[w], routingNumber[w], accountType:checking|savings}
-CryptoPayment:        {type:"crypto"[ro], walletAddress, currency:BTC|ETH|USDC|SOL}
-CreatePaymentRequest: {amount:float(>=0.01), currency:USD|EUR|GBP|JPY, method:PaymentMethod, metadata?:{*:string}}
-BaseRequest:          {requestId:uuid, note?(max:500)}
-CreateRefundRequest:  extends BaseRequest & {amount:float(>=0.01), reason?:duplicate|fraudulent|customer_request|other}
-Refund:               {id:uuid[ro], paymentId:uuid[ro], amount:float, status:pending|completed|failed[ro], reason?:duplicate|fraudulent|customer_request|other, createdAt:datetime[ro]}
-ErrorResponse:        {error, message, code?}
+Payment:                 {id:uuid[ro], amount:float, currency:USD|EUR|GBP|JPY, status:pending|processing|completed|failed|refunded[ro], method:PaymentMethod, failureReason?:string|null, createdAt:datetime[ro], updatedAt:datetime[ro]}
+PaymentMethod:           OneOf<CreditCardPayment, BankTransferPayment, CryptoPayment> on type
+CreditCardPayment:       {type:"credit_card"[ro], cardNumber[w](16..16), cardCvv[w](3..4), expiryDate:date, cardholderName}
+BankTransferPayment:     {type:"bank_transfer"[ro], accountNumber[w], routingNumber[w], accountType:checking|savings}
+CryptoPayment:           {type:"crypto"[ro], walletAddress, currency:BTC|ETH|USDC|SOL}
+CreatePaymentRequest:    {amount:float(>=0.01), currency:USD|EUR|GBP|JPY, method:PaymentMethod, metadata?:{*:string}}
+BaseRequest:             {requestId:uuid, note?(max:500)}
+CreateRefundRequest:     extends BaseRequest & {amount:float(>=0.01), reason?:duplicate|fraudulent|customer_request|other}
+Refund:                  {id:uuid[ro], paymentId:uuid[ro], amount:float, status:pending|completed|failed[ro], reason?:duplicate|fraudulent|customer_request|other, createdAt:datetime[ro]}
+ErrorResponse:           {error, message, code?}
 ValidationErrorResponse: {error, message, fields:{*:string[]}}
-Pagination:           {page?:int, totalPages?:int, totalItems?:int, itemsPerPage?:int}
+Pagination:              {page?:int, totalPages?:int, totalItems?:int, itemsPerPage?:int}

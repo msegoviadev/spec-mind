@@ -11,11 +11,11 @@
 ## Products
 GET /products
   ?page:int=1, ?limit:int=20(<=100)
-  -> 200: {products:Product[], pagination:Pagination}
+  -> 200: {products?:Product[], pagination?:Pagination}
 
 GET /products/{productId:uuid}
   -> 200: Product
-  -> 404: {error, message, code}
+  -> 404: {error?, message?, code?}
 
 ## Orders
 POST /orders
@@ -32,4 +32,4 @@ Order:              {id:uuid[ro], userId, items:OrderItem[], totalAmount?:float,
 OrderItem:          {productId, productName?, quantity:int(>=1), price:float}
 CreateOrderRequest: {userId, items:{productId, quantity:int(>=1)}[](min:1), shippingAddress:Address}
 Address:            {street, city, state, zipCode, country?="USA"}
-Pagination:         {currentPage:int, totalPages:int, totalItems:int, itemsPerPage:int}
+Pagination:         {currentPage?:int, totalPages?:int, totalItems?:int, itemsPerPage?:int}
