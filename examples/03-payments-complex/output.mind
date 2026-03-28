@@ -1,4 +1,3 @@
-# COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
 # Source: examples/03-payments-complex/input.openapi.yaml | Generated: 2026-03-22T00:00:00Z | Spec version: 3.0.0
 # API: Catalog & Pricing API — https://api.catalog.example.com/v3
 # NOTATION: ? optional  [ro] readOnly  [w] writeOnly  =val default

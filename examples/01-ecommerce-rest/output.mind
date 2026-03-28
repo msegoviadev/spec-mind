@@ -1,4 +1,3 @@
-# COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
 # Source: examples/01-ecommerce-rest/input.openapi.yaml | Generated: 2026-03-22T00:00:00Z | Spec version: 1.0.0
 # API: E-commerce API — https://api.example.com/v1
 # NOTATION: ? optional  [ro] readOnly  [w] writeOnly  =val default

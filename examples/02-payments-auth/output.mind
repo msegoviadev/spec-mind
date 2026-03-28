@@ -1,4 +1,3 @@
-# COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
 # Source: examples/02-payments-auth/input.openapi.yaml | Generated: 2026-03-22T00:00:00Z | Spec version: 2.1.0
 # API: Payments API — https://api.payments.example.com/v2
 # NOTATION: ? optional  [ro] readOnly  [w] writeOnly  =val default

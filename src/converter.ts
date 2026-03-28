@@ -28,7 +28,6 @@ export function convert(doc: Document, opts: ConvertOptions): string {
   const lines: string[] = []
 
   // Header
-  lines.push('# COMPACT INDEX — navigational summary only. Do not derive contracts from this file.')
   lines.push(`# Source: ${opts.sourcePath} | Generated: ${opts.generatedAt} | Spec version: ${doc.info.version}`)
 
   const baseUrl = resolveServerUrl(doc)
@@ -84,6 +83,10 @@ export function convert(doc: Document, opts: ConvertOptions): string {
     }
   }
 
+  while (lines.length > 0 && lines[lines.length - 1] === '') {
+    lines.pop()
+  }
+
   return lines.join('\n') + '\n'
 }
 
@@ -107,8 +110,7 @@ function resolveServerUrl(doc: Document): string {
 
 function renderServers(doc: Document): string {
   const servers = doc.servers
-  if (!servers || servers.length === 0) return ''
-  if (servers.length === 1) return ''
+  if (!servers || servers.length <= 1) return ''
 
   const labelCounts: Map<string, number> = new Map()
   const parts: string[] = []
@@ -116,10 +118,15 @@ function renderServers(doc: Document): string {
   for (const server of servers) {
     let url = server.url
     const vars = server.variables || {}
+    const varInfos: string[] = []
 
     for (const [key, varDef] of Object.entries(vars)) {
       const replacement = varDef.default ?? `{${key}}`
       url = url.replace(`{${key}}`, replacement)
+      
+      if (varDef.enum && varDef.enum.length > 0) {
+        varInfos.push(`{${key}: ${varDef.enum.join('|')}}`)
+      }
     }
 
     let label = server.description?.trim() || extractServerLabel(url)
@@ -131,7 +138,11 @@ function renderServers(doc: Document): string {
       label = `${label} ${count + 1}`
     }
 
-    parts.push(`${label}=${url}`)
+    let part = `${label}=${url}`
+    if (varInfos.length > 0) {
+      part += ` ${varInfos.join(' ')}`
+    }
+    parts.push(part)
   }
 
   return `# Servers: ${parts.join(', ')}`
