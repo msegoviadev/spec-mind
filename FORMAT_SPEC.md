@@ -13,7 +13,6 @@ See **Section 16** for a complete list of known limitations and intentionally de
 Every `.mind` file begins with a required header block:
 
 ```
-# COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
 # Source: <relative path to source spec> | Generated: <ISO 8601 timestamp> | Spec version: <info.version>
 # API: <info.title> — <servers[0].url>
 # Servers: <label>=<url> [, <label>=<url>...]

@@ -28,7 +28,6 @@ export function convert(doc: Document, opts: ConvertOptions): string {
   const lines: string[] = []
 
   // Header
-  lines.push('# COMPACT INDEX — navigational summary only. Do not derive contracts from this file.')
   lines.push(`# Source: ${opts.sourcePath} | Generated: ${opts.generatedAt} | Spec version: ${doc.info.version}`)
 
   const baseUrl = resolveServerUrl(doc)
