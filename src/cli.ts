@@ -4,8 +4,9 @@ import SwaggerParser from '@apidevtools/swagger-parser'
 import { convert } from './converter'
 import { readFileSync, writeFileSync, existsSync, readdirSync, unlinkSync, statSync } from 'node:fs'
 import { join, dirname, basename, extname, resolve } from 'node:path'
+import pkg from '../package.json' with { type: 'json' }
 
-const VERSION = '0.3.1'
+const VERSION = pkg.version
 
 function findSpecs(dir: string): string[] {
   const specs: string[] = []
