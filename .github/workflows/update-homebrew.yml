@@ -15,29 +15,6 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
       
-      - name: Download checksums
-        run: |
-          VERSION="${{ steps.version.outputs.VERSION }}"
-          BASE_URL="https://github.com/msegoviadev/spec-mind/releases/download/v${VERSION}"
-          
-          curl -sLO "${BASE_URL}/spec-mind-darwin-arm64.sha256"
-          curl -sLO "${BASE_URL}/spec-mind-darwin-x64.sha256"
-          curl -sLO "${BASE_URL}/spec-mind-linux-x64.sha256"
-          curl -sLO "${BASE_URL}/spec-mind-linux-arm64.sha256"
-      
-      - name: Extract checksums
-        id: checksums
-        run: |
-          DARWIN_ARM64=$(cut -d' ' -f1 spec-mind-darwin-arm64.sha256)
-          DARWIN_X64=$(cut -d' ' -f1 spec-mind-darwin-x64.sha256)
-          LINUX_X64=$(cut -d' ' -f1 spec-mind-linux-x64.sha256)
-          LINUX_ARM64=$(cut -d' ' -f1 spec-mind-linux-arm64.sha256)
-          
-          echo "darwin_arm64=${DARWIN_ARM64}" >> $GITHUB_OUTPUT
-          echo "darwin_x64=${DARWIN_X64}" >> $GITHUB_OUTPUT
-          echo "linux_x64=${LINUX_X64}" >> $GITHUB_OUTPUT
-          echo "linux_arm64=${LINUX_ARM64}" >> $GITHUB_OUTPUT
-      
       - name: Checkout homebrew-tap
         uses: actions/checkout@v4
         with:
@@ -45,22 +22,25 @@ jobs:
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           ref: main
       
-      - name: Update formula
+      - name: Download checksums and update formula
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
-          DARWIN_ARM64="${{ steps.checksums.outputs.darwin_arm64 }}"
-          DARWIN_X64="${{ steps.checksums.outputs.darwin_x64 }}"
-          LINUX_X64="${{ steps.checksums.outputs.linux_x64 }}"
-          LINUX_ARM64="${{ steps.checksums.outputs.linux_arm64 }}"
+          BASE_URL="https://github.com/msegoviadev/spec-mind/releases/download/v${VERSION}"
+          
+          # Download all checksum files
+          curl -sLO "${BASE_URL}/spec-mind-darwin-arm64.sha256"
+          curl -sLO "${BASE_URL}/spec-mind-darwin-x64.sha256"
+          curl -sLO "${BASE_URL}/spec-mind-linux-x64.sha256"
+          curl -sLO "${BASE_URL}/spec-mind-linux-arm64.sha256"
           
           # Update version
           sed -i "s/version \".*\"/version \"${VERSION}\"/" Formula/spec-mind.rb
           
-          # Update checksums by matching URL context and replacing sha256 on next line
-          sed -i '/spec-mind-darwin-arm64/{n;s/sha256 "[^"]*"/sha256 "'"${DARWIN_ARM64}"'"/}' Formula/spec-mind.rb
-          sed -i '/spec-mind-darwin-x64/{n;s/sha256 "[^"]*"/sha256 "'"${DARWIN_X64}"'"/}' Formula/spec-mind.rb
-          sed -i '/spec-mind-linux-x64/{n;s/sha256 "[^"]*"/sha256 "'"${LINUX_X64}"'"/}' Formula/spec-mind.rb
-          sed -i '/spec-mind-linux-arm64/{n;s/sha256 "[^"]*"/sha256 "'"${LINUX_ARM64}"'"/}' Formula/spec-mind.rb
+          # Update checksums - read directly from files, never assign to variables
+          sed -i '/spec-mind-darwin-arm64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-darwin-arm64.sha256)"'"/}' Formula/spec-mind.rb
+          sed -i '/spec-mind-darwin-x64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-darwin-x64.sha256)"'"/}' Formula/spec-mind.rb
+          sed -i '/spec-mind-linux-x64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-linux-x64.sha256)"'"/}' Formula/spec-mind.rb
+          sed -i '/spec-mind-linux-arm64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-linux-arm64.sha256)"'"/}' Formula/spec-mind.rb
       
       - name: Commit and push
         run: |
