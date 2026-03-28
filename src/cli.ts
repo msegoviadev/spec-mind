@@ -5,7 +5,7 @@ import { convert } from './converter'
 import { readFileSync, writeFileSync, existsSync, readdirSync, unlinkSync, statSync } from 'node:fs'
 import { join, dirname, basename, extname, resolve } from 'node:path'
 
-const VERSION = '0.1.0'
+const VERSION = '0.3.1'
 
 function findSpecs(dir: string): string[] {
   const specs: string[] = []

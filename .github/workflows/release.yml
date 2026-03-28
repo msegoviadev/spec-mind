@@ -50,3 +50,16 @@ jobs:
           asset_path: spec-mind-${{ matrix.target }}${{ matrix.ext }}
           asset_name: spec-mind-${{ matrix.target }}${{ matrix.ext }}
           asset_content_type: application/octet-stream
+      
+      - name: Generate SHA256 checksum
+        run: sha256sum spec-mind-${{ matrix.target }}${{ matrix.ext }} > spec-mind-${{ matrix.target }}.sha256
+      
+      - name: Upload checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: spec-mind-${{ matrix.target }}.sha256
+          asset_name: spec-mind-${{ matrix.target }}.sha256
+          asset_content_type: text/plain
