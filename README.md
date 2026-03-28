@@ -111,8 +111,9 @@ Stripped from output:
 
 ## Output Format
 
+Default output (with NOTATION legend):
+
 ```
-# COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
 # Source: openapi.yaml | Generated: 2026-03-22T00:00:00Z | Spec version: 1.0.0
 # API: My API — https://api.example.com/v1
 # NOTATION: ? optional  [ro] readOnly  [w] writeOnly  =val default
@@ -121,6 +122,26 @@ Stripped from output:
 #           {*:T} = map/dict  {...} = open object  extends = allOf
 #           & = inline extension  ~~name~~ = deprecated  # = inline note
 #           [multipart] [form] [binary] [text] = request body encoding
+
+## Products
+GET /products
+  ?page:int=1, ?limit:int=20(<=100)
+  -> 200: {products?:Product[], pagination?:Pagination}
+
+GET /products/{productId:uuid}
+  -> 200: Product
+  -> 404: {error?, message?, code?}
+
+## Schemas
+Product:    {id:uuid[ro], name, description?, price:float, category?, inStock?:bool=true}
+Pagination: {currentPage?:int, totalPages?:int, totalItems?:int, itemsPerPage?:int}
+```
+
+With `--no-notation` flag:
+
+```
+# Source: openapi.yaml | Generated: 2026-03-22T00:00:00Z | Spec version: 1.0.0
+# API: My API — https://api.example.com/v1
 
 ## Products
 GET /products
