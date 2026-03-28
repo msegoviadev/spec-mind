@@ -1,8 +1,10 @@
 name: Update Homebrew Formula
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: write
@@ -10,10 +12,25 @@ permissions:
 jobs:
   update-formula:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: Get release version
+      - name: Get release version from workflow run
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          # Get the release tag from the completed workflow run
+          WORKFLOW_RUN_ID=${{ github.event.workflow_run.id }}
+          gh api repos/${{ github.repository }}/workflow-runs/$WORKFLOW_RUN_ID/artifacts --jq '.artifacts[] | select(.name | startswith("spec-mind")) | .name' | head -1 | sed 's/spec-mind-//' | sed 's/-.*//' > /tmp/version.txt || true
+          
+          # If that didn't work, get from latest release
+          if [ ! -s /tmp/version.txt ]; then
+            gh api repos/${{ github.repository }}/releases/latest --jq '.tag_name' | sed 's/^v//' > /tmp/version.txt
+          fi
+          
+          VERSION=$(cat /tmp/version.txt)
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Detected version: ${VERSION}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Checkout homebrew-tap
         uses: actions/checkout@v4
@@ -27,71 +44,51 @@ jobs:
           VERSION="${{ steps.version.outputs.VERSION }}"
           BASE_URL="https://github.com/msegoviadev/spec-mind/releases/download/v${VERSION}"
           
-          # Download all checksum files
-          echo "=== Downloading checksum files ==="
-          curl -sLO "${BASE_URL}/spec-mind-darwin-arm64.sha256"
-          curl -sLO "${BASE_URL}/spec-mind-darwin-x64.sha256"
-          curl -sLO "${BASE_URL}/spec-mind-linux-x64.sha256"
-          curl -sLO "${BASE_URL}/spec-mind-linux-arm64.sha256"
+          echo "Downloading checksums for v${VERSION}..."
           
-          # Debug: show downloaded files
+          # Download all checksum files
+          for i in 1 2 3 4 5; do
+            echo "Attempt $i..."
+            if curl -sLO "${BASE_URL}/spec-mind-darwin-arm64.sha256" && \
+               curl -sLO "${BASE_URL}/spec-mind-darwin-x64.sha256" && \
+               curl -sLO "${BASE_URL}/spec-mind-linux-x64.sha256" && \
+               curl -sLO "${BASE_URL}/spec-mind-linux-arm64.sha256"; then
+              # Verify files are valid (not "Not Found" error pages)
+              if grep -q "sha256" spec-mind-darwin-arm64.sha256 2>/dev/null || \
+                 grep -E "^[a-f0-9]{64}" spec-mind-darwin-arm64.sha256; then
+                echo "Checksums downloaded successfully"
+                break
+              fi
+            fi
+            echo "Checksums not available yet, waiting..."
+            sleep 10
+          done
+          
+          # Verify downloads
           echo "=== Downloaded files ==="
           ls -la *.sha256
-          
-          # Debug: show file contents
-          echo "=== File contents ==="
-          echo "darwin-arm64:"
-          cat spec-mind-darwin-arm64.sha256
-          echo ""
-          echo "darwin-x64:"
-          cat spec-mind-darwin-x64.sha256
-          echo ""
-          echo "linux-x64:"
-          cat spec-mind-linux-x64.sha256
-          echo ""
-          echo "linux-arm64:"
-          cat spec-mind-linux-arm64.sha256
-          echo ""
-          
-          # Debug: show extracted values
-          echo "=== Extracted checksums ==="
-          echo "darwin-arm64 checksum:"
-          cut -d' ' -f1 spec-mind-darwin-arm64.sha256
-          echo "darwin-x64 checksum:"
-          cut -d' ' -f1 spec-mind-darwin-x64.sha256
-          echo "linux-x64 checksum:"
-          cut -d' ' -f1 spec-mind-linux-x64.sha256
-          echo "linux-arm64 checksum:"
-          cut -d' ' -f1 spec-mind-linux-arm64.sha256
+          for f in *.sha256; do
+            echo "$f:"
+            cat "$f"
+          done
           
           # Update version
           sed -i "s/version \".*\"/version \"${VERSION}\"/" Formula/spec-mind.rb
           
-          # Debug: show formula before changes
-          echo "=== Formula before checksums update ==="
-          grep -A1 'spec-mind-darwin-arm64' Formula/spec-mind.rb
-          grep -A1 'spec-mind-darwin-x64' Formula/spec-mind.rb
-          grep -A1 'spec-mind-linux-x64' Formula/spec-mind.rb
-          grep -A1 'spec-mind-linux-arm64' Formula/spec-mind.rb
-          
-          # Update checksums - read directly from files
+          # Update checksums
           sed -i '/spec-mind-darwin-arm64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-darwin-arm64.sha256)"'"/}' Formula/spec-mind.rb
           sed -i '/spec-mind-darwin-x64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-darwin-x64.sha256)"'"/}' Formula/spec-mind.rb
           sed -i '/spec-mind-linux-x64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-linux-x64.sha256)"'"/}' Formula/spec-mind.rb
           sed -i '/spec-mind-linux-arm64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-linux-arm64.sha256)"'"/}' Formula/spec-mind.rb
           
-          # Debug: show formula after changes
-          echo "=== Formula after checksums update ==="
-          grep -A1 'spec-mind-darwin-arm64' Formula/spec-mind.rb
-          grep -A1 'spec-mind-darwin-x64' Formula/spec-mind.rb
-          grep -A1 'spec-mind-linux-x64' Formula/spec-mind.rb
-          grep -A1 'spec-mind-linux-arm64' Formula/spec-mind.rb
-          echo "=== End debug ==="
+          # Verify update
+          echo "=== Updated formula ==="
+          grep -A1 'sha256' Formula/spec-mind.rb
       
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Formula/spec-mind.rb
-          git commit -m "Update spec-mind to v${{ steps.version.outputs.VERSION }}"
+          git commit -m "Update spec-mind to v${{ steps.version.outputs.VERSION }}" || echo "No changes to commit"
           git push
