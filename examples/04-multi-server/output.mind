@@ -11,4 +11,3 @@
 ## Health
 GET /health
   -> 200: {status?:healthy|unhealthy, region?}
-

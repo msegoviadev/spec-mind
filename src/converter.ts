@@ -83,6 +83,10 @@ export function convert(doc: Document, opts: ConvertOptions): string {
     }
   }
 
+  while (lines.length > 0 && lines[lines.length - 1] === '') {
+    lines.pop()
+  }
+
   return lines.join('\n') + '\n'
 }
 
