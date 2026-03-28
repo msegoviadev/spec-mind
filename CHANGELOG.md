@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.3](https://github.com/msegoviadev/spec-mind/compare/v0.4.2...v0.4.3) (2026-03-28)
+
+
+### Bug Fixes
+
+* avoid GitHub Actions masking by processing checksums inline ([21f3b5c](https://github.com/msegoviadev/spec-mind/commit/21f3b5cc1ae75c0aa42bd1f5f55faf49d6accd0a))
+
 ## [0.4.2](https://github.com/msegoviadev/spec-mind/compare/v0.4.1...v0.4.2) (2026-03-28)
 
 
