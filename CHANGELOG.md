@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.5](https://github.com/msegoviadev/spec-mind/compare/v0.4.4...v0.4.5) (2026-03-28)
+
+
+### Bug Fixes
+
+* use workflow_run to wait for Release workflow completion ([426d870](https://github.com/msegoviadev/spec-mind/commit/426d87079679b8840367f16af21d4d17f2c6b251))
+
 ## [0.4.4](https://github.com/msegoviadev/spec-mind/compare/v0.4.3...v0.4.4) (2026-03-28)
 
 
