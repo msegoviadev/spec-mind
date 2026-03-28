@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/msegoviadev/spec-mind/compare/v0.4.0...v0.4.1) (2026-03-28)
+
+
+### Bug Fixes
+
+* use PAT for release-please to trigger downstream workflows ([26cf20b](https://github.com/msegoviadev/spec-mind/commit/26cf20b7e8a1275ae879ac9beb7e1dc3301a4dd2))
+
 ## [0.4.0](https://github.com/msegoviadev/spec-mind/compare/v0.3.1...v0.4.0) (2026-03-28)
 
 
