@@ -16,6 +16,7 @@ Every `.mind` file begins with a required header block:
 # COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
 # Source: <relative path to source spec> | Generated: <ISO 8601 timestamp> | Spec version: <info.version>
 # API: <info.title> — <servers[0].url>
+# Servers: <label>=<url> [, <label>=<url>...]
 # NOTATION: ? optional  [ro] readOnly  [w] writeOnly  =val default
 #           ^ header  ~cookie  *N multipleOf N  | enum or nullable
 #           OneOf<A,B> on field = discriminated union
@@ -27,8 +28,8 @@ Every `.mind` file begins with a required header block:
 - `Source` is the path relative to the repo root
 - `Generated` is the UTC timestamp of conversion
 - `Spec version` is the value of `info.version` from the source spec
-- If multiple servers are defined, use the first one
 - If `servers[0].url` contains variable placeholders (e.g. `https://{environment}.api.example.com/v1`), substitute each variable with its `default` value from `servers[0].variables`. If no default is defined for a variable, emit the placeholder as-is.
+- `Servers` lists all available servers when multiple are defined. Format: `label=url` pairs separated by commas. The label is the server's `description` field, or a derived name from the URL host. If multiple servers share the same label, append numbers (e.g., `Production=...`, `Production 2=...`). URLs have variables substituted with default values. If only one server is defined, the `Servers` line is omitted.
 - The `NOTATION` lines are a fixed legend — include verbatim in every output file
 
 ---
@@ -549,7 +550,7 @@ The following are never included in the compact output:
 - `$schema` and `$id` metadata
 - `externalDocs` references
 - `xml` annotations
-- `servers` block (captured in file header instead)
+- `servers` block — server URLs are shown in the file header (`# API:` line for primary server, `# Servers:` line for additional servers when multiple are defined)
 - `info` block beyond `title` and `version`
 - `x-` extension fields (vendor extensions)
 

@@ -33,6 +33,11 @@ export function convert(doc: Document, opts: ConvertOptions): string {
 
   const baseUrl = resolveServerUrl(doc)
   lines.push(`# API: ${doc.info.title} — ${baseUrl}`)
+  
+  const serversLine = renderServers(doc)
+  if (serversLine) {
+    lines.push(serversLine)
+  }
 
   if (!opts.noNotation) {
     lines.push(NOTATION_LEGEND)
@@ -98,6 +103,59 @@ function resolveServerUrl(doc: Document): string {
   }
 
   return url
+}
+
+function renderServers(doc: Document): string {
+  const servers = doc.servers
+  if (!servers || servers.length === 0) return ''
+  if (servers.length === 1) return ''
+
+  const labelCounts: Map<string, number> = new Map()
+  const parts: string[] = []
+
+  for (const server of servers) {
+    let url = server.url
+    const vars = server.variables || {}
+
+    for (const [key, varDef] of Object.entries(vars)) {
+      const replacement = varDef.default ?? `{${key}}`
+      url = url.replace(`{${key}}`, replacement)
+    }
+
+    let label = server.description?.trim() || extractServerLabel(url)
+    
+    const count = labelCounts.get(label) || 0
+    labelCounts.set(label, count + 1)
+    
+    if (count > 0) {
+      label = `${label} ${count + 1}`
+    }
+
+    parts.push(`${label}=${url}`)
+  }
+
+  return `# Servers: ${parts.join(', ')}`
+}
+
+function extractServerLabel(url: string): string {
+  try {
+    const parsed = new URL(url)
+    const host = parsed.hostname
+    const parts = host.split('.')
+    const first = parts[0]
+    
+    if (!first || first === 'localhost' || first === '127' || first === '0') {
+      return 'localhost'
+    }
+    
+    if (parts.length >= 2 && first !== 'api' && first !== 'www') {
+      return first
+    }
+    
+    return 'production'
+  } catch {
+    return 'server'
+  }
 }
 
 // ── Reference counting ────────────────────────────────────────────────────────
