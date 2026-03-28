@@ -4,28 +4,13 @@ Convert OpenAPI and AsyncAPI specifications into compact, token-efficient `.mind
 
 ## Installation
 
-### Download Binary (Recommended)
+### Homebrew (Recommended)
 
-Download from [GitHub Releases](https://github.com/msegoviadev/spec-mind/releases):
+macOS and Linux:
 
 ```bash
-# macOS (Apple Silicon)
-curl -LO https://github.com/msegoviadev/spec-mind/releases/latest/download/spec-mind-darwin-arm64
-chmod +x spec-mind-darwin-arm64
-sudo mv spec-mind-darwin-arm64 /usr/local/bin/spec-mind
-
-# macOS (Intel)
-curl -LO https://github.com/msegoviadev/spec-mind/releases/latest/download/spec-mind-darwin-x64
-chmod +x spec-mind-darwin-x64
-sudo mv spec-mind-darwin-x64 /usr/local/bin/spec-mind
-
-# Linux (x64)
-curl -LO https://github.com/msegoviadev/spec-mind/releases/latest/download/spec-mind-linux-x64
-chmod +x spec-mind-linux-x64
-sudo mv spec-mind-linux-x64 /usr/local/bin/spec-mind
-
-# Windows (PowerShell)
-Invoke-WebRequest -Uri https://github.com/msegoviadev/spec-mind/releases/latest/download/spec-mind-windows-x64.exe -OutFile spec-mind.exe
+brew tap msegoviadev/tap
+brew install spec-mind
 ```
 
 ### Build from Source
@@ -36,6 +21,15 @@ cd spec-mind
 bun install
 bun run build
 ```
+
+## Supported Platforms
+
+| Platform | Architecture | Installation |
+|----------|--------------|--------------|
+| macOS | Apple Silicon (M1/M2) | Homebrew |
+| macOS | Intel (x64) | Homebrew |
+| Linux | x64 | Homebrew |
+| Linux | ARM64 | Homebrew |
 
 ## Usage
 
@@ -110,6 +104,7 @@ See [FORMAT_SPEC.md](./FORMAT_SPEC.md) for the complete `.mind` specification.
 - Deprecation markers
 
 Stripped from output:
+
 - Prose descriptions and examples
 - Cosmetic metadata and server boilerplate
 - External docs and vendor extensions
