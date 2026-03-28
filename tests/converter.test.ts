@@ -33,3 +33,21 @@ describe('converter golden-file tests', () => {
     })
   }
 })
+
+describe('--no-notation mode', () => {
+  test('omits NOTATION legend from output', async () => {
+    const inputPath = join(EXAMPLES_DIR, '01-ecommerce-rest/input.openapi.yaml')
+    const expectedPath = join(EXAMPLES_DIR, '01-ecommerce-rest/output-no-notation.mind')
+    
+    const doc = await SwaggerParser.bundle(inputPath) as OpenAPIV3.Document
+    const expected = readFileSync(expectedPath, 'utf-8')
+
+    const result = convert(doc, {
+      sourcePath: 'examples/01-ecommerce-rest/input.openapi.yaml',
+      generatedAt: '2026-03-22T00:00:00Z',
+      noNotation: true,
+    })
+
+    expect(result).toBe(expected)
+  })
+})
