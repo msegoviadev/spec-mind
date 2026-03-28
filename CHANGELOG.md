@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.6](https://github.com/msegoviadev/spec-mind/compare/v0.4.5...v0.4.6) (2026-03-28)
+
+
+### Bug Fixes
+
+* trigger release to test homebrew workflow ([f4f9297](https://github.com/msegoviadev/spec-mind/commit/f4f9297de4ab4a0aa751fb01011741d480126406))
+
 ## [0.4.5](https://github.com/msegoviadev/spec-mind/compare/v0.4.4...v0.4.5) (2026-03-28)
 
 
