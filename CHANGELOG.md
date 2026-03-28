@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/msegoviadev/spec-mind/compare/v0.4.1...v0.4.2) (2026-03-28)
+
+
+### Bug Fixes
+
+* use robust sed pattern to update checksums by URL context ([dc3aaba](https://github.com/msegoviadev/spec-mind/commit/dc3aaba2aff9e292d65726a9017c89f74b34b313))
+
 ## [0.4.1](https://github.com/msegoviadev/spec-mind/compare/v0.4.0...v0.4.1) (2026-03-28)
 
 
