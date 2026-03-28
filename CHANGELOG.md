@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/msegoviadev/spec-mind/compare/v0.3.1...v0.4.0) (2026-03-28)
+
+
+### Features
+
+* add homebrew tap support with auto-update workflow ([eb1e6c8](https://github.com/msegoviadev/spec-mind/commit/eb1e6c8ff9d1fac9311d0bd4126a6f62c98c30a8))
+
 ## [0.3.1](https://github.com/msegoviadev/spec-mind/compare/v0.3.0...v0.3.1) (2026-03-22)
 
 
