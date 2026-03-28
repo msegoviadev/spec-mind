@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.0](https://github.com/msegoviadev/spec-mind/compare/v0.4.6...v0.5.0) (2026-03-28)
+
+
+### Features
+
+* add servers list to .mind header when multiple servers defined ([9f653c7](https://github.com/msegoviadev/spec-mind/commit/9f653c717e5d0dc42fa5253961119d0247ea0171))
+* improve .mind header and add servers support ([8110145](https://github.com/msegoviadev/spec-mind/commit/8110145f1d3f65ea01360e0c5f388346bec68246))
+* show server variable enums inline in Servers header ([1633f8a](https://github.com/msegoviadev/spec-mind/commit/1633f8a7f2bc437c21dd39c746a98d02b0545449))
+
+
+### Bug Fixes
+
+* trim trailing blank lines from .mind output ([51b5054](https://github.com/msegoviadev/spec-mind/commit/51b5054f8b63c102bde93308ee16041a9b0bd92f))
+
 ## [0.4.6](https://github.com/msegoviadev/spec-mind/compare/v0.4.5...v0.4.6) (2026-03-28)
 
 
