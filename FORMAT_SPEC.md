@@ -29,7 +29,7 @@ Every `.mind` file begins with a required header block:
 - `Generated` is the UTC timestamp of conversion
 - `Spec version` is the value of `info.version` from the source spec
 - If `servers[0].url` contains variable placeholders (e.g. `https://{environment}.api.example.com/v1`), substitute each variable with its `default` value from `servers[0].variables`. If no default is defined for a variable, emit the placeholder as-is.
-- `Servers` lists all available servers when multiple are defined. Format: `label=url` pairs separated by commas. The label is the server's `description` field, or a derived name from the URL host. If multiple servers share the same label, append numbers (e.g., `Production=...`, `Production 2=...`). URLs have variables substituted with default values. If only one server is defined, the `Servers` line is omitted.
+- `Servers` lists all available servers when multiple are defined. Format: `label=url` pairs separated by commas. The label is the server's `description` field, or a derived name from the URL host. If multiple servers share the same label, append numbers (e.g., `Production=...`, `Production 2=...`). URLs have variables substituted with default values. For server variables that define an `enum`, show all possible values inline after the URL in the format `{varName: val1|val2|val3}`. Variables without `enum` show only the default-substituted URL. If only one server is defined, the `Servers` line is omitted.
 - The `NOTATION` lines are a fixed legend — include verbatim in every output file
 
 ---

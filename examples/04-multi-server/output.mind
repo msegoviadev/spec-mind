@@ -1,0 +1,15 @@
+# COMPACT INDEX — navigational summary only. Do not derive contracts from this file.
+# Source: examples/04-multi-server/input.openapi.yaml | Generated: 2026-03-22T00:00:00Z | Spec version: 1.0.0
+# API: Multi-Region API — https://api.example.com/v1
+# Servers: Production=https://api.example.com/v1, Staging=https://staging.api.example.com/v1, Staging 2=https://staging.api.example.com/v1, Local development=http://localhost:3000, Regional=https://us.api.example.com/v1 {region: us|eu|asia}, User-specific=https://me.api.example.com/v1
+# NOTATION: ? optional  [ro] readOnly  [w] writeOnly  =val default
+#           ^ header  ~cookie  *N multipleOf N  | enum or nullable
+#           OneOf<A,B> on field = discriminated union
+#           {*:T} = map/dict  {...} = open object  extends = allOf
+#           & = inline extension  ~~name~~ = deprecated  # = inline note
+#           [multipart] [form] [binary] [text] = request body encoding
+
+## Health
+GET /health
+  -> 200: {status?:healthy|unhealthy, region?}
+
