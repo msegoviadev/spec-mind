@@ -48,15 +48,19 @@ jobs:
       - name: Update formula
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
+          DARWIN_ARM64="${{ steps.checksums.outputs.darwin_arm64 }}"
+          DARWIN_X64="${{ steps.checksums.outputs.darwin_x64 }}"
+          LINUX_X64="${{ steps.checksums.outputs.linux_x64 }}"
+          LINUX_ARM64="${{ steps.checksums.outputs.linux_arm64 }}"
           
           # Update version
           sed -i "s/version \".*\"/version \"${VERSION}\"/" Formula/spec-mind.rb
           
-          # Update checksums
-          sed -i "s/sha256 \"PLACEHOLDER_DARWIN_ARM64\"/sha256 \"${{ steps.checksums.outputs.darwin_arm64 }}\"/" Formula/spec-mind.rb
-          sed -i "s/sha256 \"PLACEHOLDER_DARWIN_X64\"/sha256 \"${{ steps.checksums.outputs.darwin_x64 }}\"/" Formula/spec-mind.rb
-          sed -i "s/sha256 \"PLACEHOLDER_LINUX_X64\"/sha256 \"${{ steps.checksums.outputs.linux_x64 }}\"/" Formula/spec-mind.rb
-          sed -i "s/sha256 \"PLACEHOLDER_LINUX_ARM64\"/sha256 \"${{ steps.checksums.outputs.linux_arm64 }}\"/" Formula/spec-mind.rb
+          # Update checksums by matching URL context and replacing sha256 on next line
+          sed -i '/spec-mind-darwin-arm64/{n;s/sha256 "[^"]*"/sha256 "'"${DARWIN_ARM64}"'"/}' Formula/spec-mind.rb
+          sed -i '/spec-mind-darwin-x64/{n;s/sha256 "[^"]*"/sha256 "'"${DARWIN_X64}"'"/}' Formula/spec-mind.rb
+          sed -i '/spec-mind-linux-x64/{n;s/sha256 "[^"]*"/sha256 "'"${LINUX_X64}"'"/}' Formula/spec-mind.rb
+          sed -i '/spec-mind-linux-arm64/{n;s/sha256 "[^"]*"/sha256 "'"${LINUX_ARM64}"'"/}' Formula/spec-mind.rb
       
       - name: Commit and push
         run: |
