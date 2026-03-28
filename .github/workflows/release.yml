@@ -24,9 +24,6 @@ jobs:
           - os: macos-latest
             target: darwin-arm64
             ext: ''
-          - os: windows-latest
-            target: windows-x64
-            ext: '.exe'
     
     runs-on: ${{ matrix.os }}
     steps:
@@ -63,3 +60,46 @@ jobs:
           asset_path: spec-mind-${{ matrix.target }}.sha256
           asset_name: spec-mind-${{ matrix.target }}.sha256
           asset_content_type: text/plain
+
+  update-homebrew:
+    needs: [build-binary]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+      - name: Checkout homebrew-tap
+        uses: actions/checkout@v4
+        with:
+          repository: msegoviadev/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          ref: main
+      
+      - name: Download checksums and update formula
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          BASE_URL="https://github.com/msegoviadev/spec-mind/releases/download/v${VERSION}"
+          
+          # Download checksums (guaranteed to exist after build-binary completes)
+          curl -sLO "${BASE_URL}/spec-mind-darwin-arm64.sha256"
+          curl -sLO "${BASE_URL}/spec-mind-darwin-x64.sha256"
+          curl -sLO "${BASE_URL}/spec-mind-linux-x64.sha256"
+          curl -sLO "${BASE_URL}/spec-mind-linux-arm64.sha256"
+          
+          # Update version
+          sed -i "s/version \".*\"/version \"${VERSION}\"/" Formula/spec-mind.rb
+          
+          # Update checksums
+          sed -i '/spec-mind-darwin-arm64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-darwin-arm64.sha256)"'"/}' Formula/spec-mind.rb
+          sed -i '/spec-mind-darwin-x64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-darwin-x64.sha256)"'"/}' Formula/spec-mind.rb
+          sed -i '/spec-mind-linux-x64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-linux-x64.sha256)"'"/}' Formula/spec-mind.rb
+          sed -i '/spec-mind-linux-arm64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-linux-arm64.sha256)"'"/}' Formula/spec-mind.rb
+      
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/spec-mind.rb
+          git commit -m "Update spec-mind to v${{ steps.version.outputs.VERSION }}" || echo "No changes to commit"
+          git push
