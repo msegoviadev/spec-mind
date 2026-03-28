@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.4](https://github.com/msegoviadev/spec-mind/compare/v0.4.3...v0.4.4) (2026-03-28)
+
+
+### Bug Fixes
+
+* trigger release for debugging ([a477398](https://github.com/msegoviadev/spec-mind/commit/a477398359f24056fb1ac0b788b4081277245b9c))
+
 ## [0.4.3](https://github.com/msegoviadev/spec-mind/compare/v0.4.2...v0.4.3) (2026-03-28)
 
 
