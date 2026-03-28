@@ -28,19 +28,65 @@ jobs:
           BASE_URL="https://github.com/msegoviadev/spec-mind/releases/download/v${VERSION}"
           
           # Download all checksum files
+          echo "=== Downloading checksum files ==="
           curl -sLO "${BASE_URL}/spec-mind-darwin-arm64.sha256"
           curl -sLO "${BASE_URL}/spec-mind-darwin-x64.sha256"
           curl -sLO "${BASE_URL}/spec-mind-linux-x64.sha256"
           curl -sLO "${BASE_URL}/spec-mind-linux-arm64.sha256"
           
+          # Debug: show downloaded files
+          echo "=== Downloaded files ==="
+          ls -la *.sha256
+          
+          # Debug: show file contents
+          echo "=== File contents ==="
+          echo "darwin-arm64:"
+          cat spec-mind-darwin-arm64.sha256
+          echo ""
+          echo "darwin-x64:"
+          cat spec-mind-darwin-x64.sha256
+          echo ""
+          echo "linux-x64:"
+          cat spec-mind-linux-x64.sha256
+          echo ""
+          echo "linux-arm64:"
+          cat spec-mind-linux-arm64.sha256
+          echo ""
+          
+          # Debug: show extracted values
+          echo "=== Extracted checksums ==="
+          echo "darwin-arm64 checksum:"
+          cut -d' ' -f1 spec-mind-darwin-arm64.sha256
+          echo "darwin-x64 checksum:"
+          cut -d' ' -f1 spec-mind-darwin-x64.sha256
+          echo "linux-x64 checksum:"
+          cut -d' ' -f1 spec-mind-linux-x64.sha256
+          echo "linux-arm64 checksum:"
+          cut -d' ' -f1 spec-mind-linux-arm64.sha256
+          
           # Update version
           sed -i "s/version \".*\"/version \"${VERSION}\"/" Formula/spec-mind.rb
           
-          # Update checksums - read directly from files, never assign to variables
+          # Debug: show formula before changes
+          echo "=== Formula before checksums update ==="
+          grep -A1 'spec-mind-darwin-arm64' Formula/spec-mind.rb
+          grep -A1 'spec-mind-darwin-x64' Formula/spec-mind.rb
+          grep -A1 'spec-mind-linux-x64' Formula/spec-mind.rb
+          grep -A1 'spec-mind-linux-arm64' Formula/spec-mind.rb
+          
+          # Update checksums - read directly from files
           sed -i '/spec-mind-darwin-arm64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-darwin-arm64.sha256)"'"/}' Formula/spec-mind.rb
           sed -i '/spec-mind-darwin-x64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-darwin-x64.sha256)"'"/}' Formula/spec-mind.rb
           sed -i '/spec-mind-linux-x64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-linux-x64.sha256)"'"/}' Formula/spec-mind.rb
           sed -i '/spec-mind-linux-arm64/{n;s/sha256 "[^"]*"/sha256 "'"$(cut -d' ' -f1 spec-mind-linux-arm64.sha256)"'"/}' Formula/spec-mind.rb
+          
+          # Debug: show formula after changes
+          echo "=== Formula after checksums update ==="
+          grep -A1 'spec-mind-darwin-arm64' Formula/spec-mind.rb
+          grep -A1 'spec-mind-darwin-x64' Formula/spec-mind.rb
+          grep -A1 'spec-mind-linux-x64' Formula/spec-mind.rb
+          grep -A1 'spec-mind-linux-arm64' Formula/spec-mind.rb
+          echo "=== End debug ==="
       
       - name: Commit and push
         run: |
