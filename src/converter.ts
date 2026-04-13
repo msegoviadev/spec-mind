@@ -306,6 +306,11 @@ function annotatePath(path: string, params: ParameterObject[]): string {
 
 // ── Operation rendering ───────────────────────────────────────────────────────
 
+function resolveComponentRef<T>(ref: string, doc: Document, section: string): T | undefined {
+  const name = ref.split('/').pop()!
+  return (doc.components as any)?.[section]?.[name] as T | undefined
+}
+
 function renderOperation(
   method: string,
   path: string,
@@ -319,11 +324,24 @@ function renderOperation(
   const deprecated = operation.deprecated ? '~~' : ''
   const methodStr = deprecated ? `~~${method}~~` : method
 
-  const params = (operation.parameters || []) as ParameterObject[]
+  // Resolve parameter $refs (bundle() leaves intra-spec refs unresolved)
+  const rawParams = (operation.parameters || []) as Array<ParameterObject | ReferenceObject>
+  const params: ParameterObject[] = rawParams.map(p =>
+    '$ref' in p
+      ? resolveComponentRef<ParameterObject>((p as ReferenceObject).$ref, doc, 'parameters')
+      : p as ParameterObject
+  ).filter(Boolean) as ParameterObject[]
+
   const annotatedPath = annotatePath(path, params)
 
-  // content-type flag
-  const contentTypeFlag = requestContentTypeFlag(operation)
+  // Resolve requestBody $ref
+  let reqBody: any = operation.requestBody
+  if (reqBody && '$ref' in reqBody) {
+    reqBody = resolveComponentRef((reqBody as ReferenceObject).$ref, doc, 'requestBodies')
+  }
+
+  // content-type flag (needs resolved reqBody)
+  const contentTypeFlag = requestContentTypeFlag(reqBody)
 
   // auth override
   const opAuth = renderOperationAuth(operation, doc, globalAuthTag)
@@ -336,15 +354,22 @@ function renderOperation(
   if (paramLine) lines.push(`  ${paramLine}`)
 
   // request body
-  const bodyLine = renderBody(operation, refCounts, schemas)
+  const bodyLine = renderBody(reqBody, refCounts, schemas)
   if (bodyLine) lines.push(`  body: ${bodyLine}`)
 
-  // responses
-  const responses = operation.responses || {}
-  const sortedCodes = Object.keys(responses).sort((a, b) => {
-    const na = parseInt(a), nb = parseInt(b)
-    return na - nb
-  })
+  // Resolve response $refs
+  const rawResponses = operation.responses || {}
+  const responses: Record<string, ResponseObject> = {}
+  for (const [code, resp] of Object.entries(rawResponses)) {
+    if (resp && '$ref' in resp) {
+      const resolved = resolveComponentRef<ResponseObject>((resp as ReferenceObject).$ref, doc, 'responses')
+      if (resolved) responses[code] = resolved
+    } else if (resp) {
+      responses[code] = resp as ResponseObject
+    }
+  }
+
+  const sortedCodes = Object.keys(responses).sort((a, b) => parseInt(a) - parseInt(b))
 
   // group codes with same body shape
   const codeGroups = groupResponseCodes(sortedCodes, responses, refCounts, schemas)
@@ -362,8 +387,8 @@ function renderOperation(
 
 // ── Content type flag ─────────────────────────────────────────────────────────
 
-function requestContentTypeFlag(operation: OperationObject): string {
-  const body = operation.requestBody as any
+function requestContentTypeFlag(reqBody: any): string {
+  const body = reqBody
   if (!body) return ''
   const content = body.content || {}
   const mediaTypes = Object.keys(content)
@@ -442,11 +467,10 @@ function renderParam(p: ParameterObject, schemas: Record<string, SchemaObject>):
 // ── Request body ──────────────────────────────────────────────────────────────
 
 function renderBody(
-  operation: OperationObject,
+  reqBody: any,
   refCounts: RefCounts,
   schemas: Record<string, SchemaObject>
 ): string {
-  const reqBody = operation.requestBody as any
   if (!reqBody) return ''
 
   const content = reqBody.content || {}
