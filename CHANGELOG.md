@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/msegoviadev/spec-mind/compare/v0.5.0...v0.5.1) (2026-04-13)
+
+
+### Bug Fixes
+
+* resolve intra-specs $refs for requestBody, responses and parameters ([66a4edf](https://github.com/msegoviadev/spec-mind/commit/66a4edf5c8027129e2a51e925ecae3aa3d6c0df8))
+
 ## [0.5.0](https://github.com/msegoviadev/spec-mind/compare/v0.4.6...v0.5.0) (2026-03-28)
 
 
