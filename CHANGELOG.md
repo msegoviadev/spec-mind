@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/msegoviadev/spec-mind/compare/v0.5.1...v0.5.2) (2026-04-14)
+
+
+### Bug Fixes
+
+* sign macOS binaries with JIT entitlements via ldid ([d4a191f](https://github.com/msegoviadev/spec-mind/commit/d4a191f7e45b72eaca8283b011d3ba114d82f049))
+
 ## [0.5.1](https://github.com/msegoviadev/spec-mind/compare/v0.5.0...v0.5.1) (2026-04-13)
 
 
