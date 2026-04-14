@@ -24,6 +24,7 @@
   "type": "module",
   "scripts": {
     "build": "bun build ./src/cli.ts --outdir ./dist --target bun",
+    "build:binary": "bun build ./src/cli.ts --compile --outfile spec-mind && ldid -Sentitlements.plist spec-mind",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },
