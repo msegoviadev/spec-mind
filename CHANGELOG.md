@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/msegoviadev/spec-mind/compare/v0.5.2...v0.6.0) (2026-04-16)
+
+
+### Features
+
+* add --stats flag with grapity-themed output ([720d019](https://github.com/msegoviadev/spec-mind/commit/720d01973f52229f10151e55cc468d12a2027a0f))
+
 ## [0.5.2](https://github.com/msegoviadev/spec-mind/compare/v0.5.1...v0.5.2) (2026-04-14)
 
 
