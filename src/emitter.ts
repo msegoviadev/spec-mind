@@ -335,6 +335,13 @@ export function renderNamedSchema(
     return `${schemaName}: extends ${rhs}`
   }
 
+  // standalone enum schema
+  if (schema.enum) {
+    if (schema.enum.length === 1) return `${schemaName}: "${schema.enum[0]}"`
+    const typePrefix = schema.type === 'integer' ? 'int:' : ''
+    return `${schemaName}: ${typePrefix}${schema.enum.join('|')}`
+  }
+
   // open / map
   const addlProps = (schema as any).additionalProperties
   if (!schema.properties) {

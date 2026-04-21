@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info:
+  title: Standalone Enum Test
+  version: 1.0.0
+servers:
+  - url: https://api.example.com
+
+paths:
+  /items/{itemId}:
+    get:
+      tags: [Items]
+      operationId: getItem
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/StatusEnum'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '404':
+          description: Not found
+
+components:
+  schemas:
+    StatusEnum:
+      type: string
+      enum:
+        - active
+        - inactive
+        - pending
+
+    PriorityEnum:
+      type: integer
+      enum:
+        - 1
+        - 2
+        - 3
+
+    CategoryEnum:
+      type: string
+      enum:
+        - product
+
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        priority:
+          $ref: '#/components/schemas/PriorityEnum'
+        category:
+          $ref: '#/components/schemas/CategoryEnum'

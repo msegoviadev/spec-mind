@@ -1,0 +1,20 @@
+# Source: examples/05-standalone-enums/input.openapi.yaml | Generated: 2026-03-22T00:00:00Z | Spec version: 1.0.0
+# API: Standalone Enum Test — https://api.example.com
+# NOTATION: ? optional  [ro] readOnly  [w] writeOnly  =val default
+#           ^ header  ~cookie  *N multipleOf N  | enum or nullable
+#           OneOf<A,B> on field = discriminated union
+#           {*:T} = map/dict  {...} = open object  extends = allOf
+#           & = inline extension  ~~name~~ = deprecated  # = inline note
+#           [multipart] [form] [binary] [text] = request body encoding
+
+## Items
+GET /items/{itemId:uuid}
+  ?status
+  -> 200: Item
+  -> 404
+
+## Schemas
+StatusEnum:   active|inactive|pending
+PriorityEnum: int:1|2|3
+CategoryEnum: "product"
+Item:         {id?:uuid[ro], status?:StatusEnum, priority?:PriorityEnum, category?:CategoryEnum}
