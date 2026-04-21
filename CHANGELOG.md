@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/msegoviadev/spec-mind/compare/v0.6.0...v0.6.1) (2026-04-21)
+
+
+### Bug Fixes
+
+* render standalone enum schemas as pipe-separated values ([47ae489](https://github.com/msegoviadev/spec-mind/commit/47ae489b681b3fc5d1270b339b13ffcd877c64b4))
+
 ## [0.6.0](https://github.com/msegoviadev/spec-mind/compare/v0.5.2...v0.6.0) (2026-04-16)
 
 
